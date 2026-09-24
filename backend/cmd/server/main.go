@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/KevinMarklin/decision-pause/backend/internal/bot"
 	"github.com/KevinMarklin/decision-pause/backend/internal/config"
 	"github.com/KevinMarklin/decision-pause/backend/internal/handler"
 	"github.com/KevinMarklin/decision-pause/backend/internal/repository"
@@ -31,6 +32,17 @@ func main() {
 	}
 
 	h := handler.New(service.New(repository.New(pool)))
+
+	if cfg.MaxBotToken != "" {
+		go func() {
+			if err := bot.Run(ctx, cfg.MaxBotToken); err != nil && ctx.Err() == nil {
+				log.Printf("max bot stopped: %v", err)
+			}
+		}()
+	} else {
+		log.Printf("max bot: MAX_BOT_TOKEN is not set, bot is disabled")
+	}
+
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
 		Handler:           h.Routes(),

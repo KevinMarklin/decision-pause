@@ -1,0 +1,16 @@
+# секреты
+.env
+.env.*
+!.env.example
+
+# сборка Go
+bin/
+*.exe
+*.test
+*.out
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

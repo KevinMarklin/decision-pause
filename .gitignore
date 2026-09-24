@@ -1,0 +1,13 @@
+# frontend (Vite / React)
+node_modules/
+dist/
+.vite/
+
+# логи
+*.log
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

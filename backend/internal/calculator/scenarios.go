@@ -21,20 +21,21 @@ func BuildScenarios(in model.Input, credit model.CreditResult) []model.Scenario 
 	expectedExpenses := roundMoney(in.Expenses * (1 + in.ExpenseGrowthPct/100))
 
 	defs := []struct {
-		key, title, emoji string
-		revenue           float64
+		key     string
+		revenue float64
 	}{
-		{"expected", "Ожидаемый", "🟢", expectedRevenue},
-		{"moderate", "Умеренно негативный", "🟡", roundMoney(expectedRevenue * ModerateFactor)},
-		{"negative", "Негативный", "🔴", roundMoney(expectedRevenue * NegativeFactor)},
+		{"expected", expectedRevenue},
+		{"moderate", roundMoney(expectedRevenue * ModerateFactor)},
+		{"negative", roundMoney(expectedRevenue * NegativeFactor)},
 	}
 
 	scenarios := make([]model.Scenario, 0, len(defs))
 	for _, d := range defs {
+		title, emoji := model.ScenarioTitle(d.key)
 		s := model.Scenario{
 			Key:         d.key,
-			Title:       d.title,
-			Emoji:       d.emoji,
+			Title:       title,
+			Emoji:       emoji,
 			Revenue:     d.revenue,
 			Expenses:    expectedExpenses,
 			LoanPayment: credit.MonthlyPayment,

@@ -14,6 +14,7 @@ function Assert($cond, $msg) {
 Write-Host "== GET /health"
 $h = Invoke-RestMethod "$Base/health"
 Assert ($h.status -eq "ok") "status=ok"
+Assert ($h.db -eq "ok") "db=ok"
 
 Write-Host "== POST /api/decisions (эталон 2 000 000 / 36 мес / 20%)"
 $body = @{
@@ -75,6 +76,48 @@ try {
     $code = $_.Exception.Response.StatusCode.value__
     Assert ($code -eq 404) "404 (got $code)"
 }
+
+function Assert-Status($action, $wantCode, $msg) {
+    try { & $action | Out-Null; $script:result = 200 } catch { $script:result = $_.Exception.Response.StatusCode.value__ }
+    Assert ($script:result -eq $wantCode) "$msg (got $($script:result))"
+}
+
+Write-Host "== Границы запросов"
+Assert-Status { Invoke-RestMethod "$Base/api/decisions?limit=0" } 400 "limit=0 → 400"
+Assert-Status { Invoke-RestMethod "$Base/api/decisions?limit=abc" } 400 "limit=abc → 400"
+Assert-Status { Invoke-RestMethod "$Base/api/decisions/not-a-uuid" } 400 "битый id → 400"
+Assert-Status {
+    Invoke-RestMethod "$Base/api/decisions" -Method Post -ContentType "application/json" `
+        -Headers @{ "X-Max-User-Id" = "abc" } -Body ([System.Text.Encoding]::UTF8.GetBytes($body))
+} 400 "битый X-Max-User-Id → 400"
+Assert-Status {
+    $unknown = '{ "inputs": { "loan_amount": 1, "interest_rate": 20 } }'
+    Invoke-RestMethod "$Base/api/decisions" -Method Post -ContentType "application/json" `
+        -Body ([System.Text.Encoding]::UTF8.GetBytes($unknown))
+} 400 "неизвестное поле → 400"
+Assert-Status {
+    $huge = '{ "inputs": { "purpose": "' + ('a' * 70000) + '" } }'
+    Invoke-RestMethod "$Base/api/decisions" -Method Post -ContentType "application/json" `
+        -Body ([System.Text.Encoding]::UTF8.GetBytes($huge))
+} 413 "тело > 64 КиБ → 413"
+
+Write-Host "== DELETE /api/decisions/{id}"
+$toDelete = Invoke-RestMethod "$Base/api/decisions" -Method Post `
+    -ContentType "application/json; charset=utf-8" `
+    -Headers @{ "X-Max-User-Id" = "777" } -Body $bytes
+try {
+    Invoke-RestMethod "$Base/api/decisions/$($toDelete.id)" -Method Delete `
+        -Headers @{ "X-Max-User-Id" = "777" } | Out-Null
+    $del1 = 204
+} catch { $del1 = $_.Exception.Response.StatusCode.value__ }
+Assert ($del1 -eq 204) "первое удаление → 204 (got $del1)"
+try {
+    Invoke-RestMethod "$Base/api/decisions/$($toDelete.id)" -Method Delete `
+        -Headers @{ "X-Max-User-Id" = "777" } | Out-Null
+    $del2 = 200
+} catch { $del2 = $_.Exception.Response.StatusCode.value__ }
+Assert ($del2 -eq 404) "повторное удаление → 404 (got $del2)"
+Assert-Status { Invoke-RestMethod "$Base/api/decisions/$($toDelete.id)" } 404 "после удаления GET → 404"
 
 Write-Host ""
 if ($failed -eq 0) { Write-Host "SMOKE OK" -ForegroundColor Green; exit 0 }

@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/KevinMarklin/decision-pause/backend/internal/auth"
 	"github.com/KevinMarklin/decision-pause/backend/internal/bot"
 	"github.com/KevinMarklin/decision-pause/backend/internal/config"
 	"github.com/KevinMarklin/decision-pause/backend/internal/handler"
@@ -17,7 +18,11 @@ import (
 )
 
 func main() {
-	cfg := config.Load()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("config: %v", err)
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -31,7 +36,16 @@ func main() {
 		log.Fatalf("migrate: %v", err)
 	}
 
-	h := handler.New(service.New(repository.New(pool)))
+	h := handler.New(
+		service.New(repository.New(pool)),
+		handler.Options{
+			Auth: auth.Config{
+				BotToken: cfg.MaxBotToken,
+				Require:  cfg.RequireInitData,
+			},
+			CORS: cfg.CorsOrigins,
+		},
+	)
 
 	if cfg.MaxBotToken != "" {
 		go func() {
@@ -47,6 +61,9 @@ func main() {
 		Addr:              ":" + cfg.Port,
 		Handler:           h.Routes(),
 		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       60 * time.Second,
 	}
 
 	go func() {

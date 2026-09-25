@@ -11,6 +11,18 @@ import (
 	"github.com/KevinMarklin/decision-pause/backend/internal/repository"
 )
 
+// Store — хранилище решений. Интерфейс, чтобы сервис тестировался фейком без БД.
+type Store interface {
+	Create(ctx context.Context, d *model.Decision) error
+	Get(ctx context.Context, id string) (model.Decision, error)
+	List(ctx context.Context, maxUserID *int64, limit int) ([]model.DecisionListItem, error)
+	Delete(ctx context.Context, id string, maxUserID *int64) (bool, error)
+	Ping(ctx context.Context) error
+}
+
+// Связка компилируется здесь же: *repository.DecisionRepo реализует Store.
+var _ Store = (*repository.DecisionRepo)(nil)
+
 // ValidationError — ошибки полей анкеты (отдаём клиенту как 400).
 type ValidationError struct {
 	Fields map[string]string
@@ -19,10 +31,10 @@ type ValidationError struct {
 func (e *ValidationError) Error() string { return "validation failed" }
 
 type DecisionService struct {
-	repo *repository.DecisionRepo
+	repo Store
 }
 
-func New(repo *repository.DecisionRepo) *DecisionService {
+func New(repo Store) *DecisionService {
 	return &DecisionService{repo: repo}
 }
 
@@ -59,11 +71,32 @@ func (s *DecisionService) List(ctx context.Context, maxUserID *int64, limit int)
 	return s.repo.List(ctx, maxUserID, limit)
 }
 
-// decorate — добавляет производные поля, которые не храним в БД.
+// Delete — снимок расчёта удалён либо не найден/чужой → repository.ErrNotFound.
+func (s *DecisionService) Delete(ctx context.Context, id string, maxUserID *int64) error {
+	ok, err := s.repo.Delete(ctx, id, maxUserID)
+	if err != nil {
+		return fmt.Errorf("delete decision: %w", err)
+	}
+	if !ok {
+		return repository.ErrNotFound
+	}
+	return nil
+}
+
+// Ping — доступность хранилища для /health.
+func (s *DecisionService) Ping(ctx context.Context) error {
+	return s.repo.Ping(ctx)
+}
+
+// decorate — производные поля, которые не храним в БД.
+// Пересчитываются на каждом чтении, чтобы смена логики расчётов применялась
+// и к старым записям (числовые поля сценариев — источник истины).
 func decorate(d *model.Decision) {
 	d.Result.Credit = calculator.CreditResult(d.Inputs)
 	for i := range d.Result.Scenarios {
-		d.Result.Scenarios[i].Title, d.Result.Scenarios[i].Emoji = model.ScenarioTitle(d.Result.Scenarios[i].Key)
+		s := &d.Result.Scenarios[i]
+		s.Title, s.Emoji = model.ScenarioTitle(s.Key)
+		s.Consequences = calculator.Consequences(*s)
 	}
 	d.Result.Checklist = calculator.Checklist()
 }

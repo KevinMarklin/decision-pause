@@ -53,14 +53,24 @@ revenue_growth_pct, expense_growth_pct, purpose
 ## 4. Работа с API
 
 - `POST /api/decisions` → ответ **одним запросом** содержит credit + scenarios + checklist
-- Заголовок `X-Max-User-Id`: `window.WebApp?.initDataUnsafe?.user?.id` (в браузере undefined — просто не шлём)
+- Идентичность пользователя:
+  - **прод:** заголовок `X-Max-Init-Data` со **сырой строкой**
+    `window.WebApp.initData` (не `initDataUnsafe`!) — бэкенд проверит подпись;
+    без неё придёт `401 {"error":"unauthorized"}`;
+  - **dev:** `X-Max-User-Id: window.WebApp?.initDataUnsafe?.user?.id`
+    (в браузере undefined — просто не шлём; битое значение → `400 invalid_user_id`).
 - Ошибка `400 {error:"validation", fields:{...}}` → подсветить поля сообщениями
+- `400 {error:"unknown_field", field:"..."}` → опечатка в имени поля формы,
+  показать как обычную ошибку валидации
+- `401 {error:"unauthorized"}` → «Откройте приложение заново» (протухлая подпись)
 - Остальные ошибки: экран «Что-то пошло не так, попробуйте ещё раз» + повтор
 - Loading-состояние на кнопке «Рассчитать» (запрос быстрый, < 100 мс)
 
 ## 5. MAX-специфика
 
 - `window.WebApp.ready()` при монтировании
+- Опционально (если успеваем): «Удалить анализ» → `DELETE /api/decisions/{id}` →
+  `204`; `404` — уже удалён или чужой
 - Всё рендерим под ширину MAX (375px+, тёмная/светлая тема — если время)
 - initData **не валидируем** на фронте (это делает backend-команда при необходимости)
 - Deep link мини-аппа: `https://max.ru/<bot>?startapp=...` — payload не используем

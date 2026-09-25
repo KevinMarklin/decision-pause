@@ -49,7 +49,7 @@ func BuildScenarios(in model.Input, credit model.CreditResult) []model.Scenario 
 			months := int(math.Floor(in.Reserve / math.Abs(s.CashFlow)))
 			s.ReserveMonths = &months
 		}
-		s.Consequences = consequences(s)
+		s.Consequences = Consequences(s)
 		scenarios = append(scenarios, s)
 	}
 	return scenarios

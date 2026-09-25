@@ -9,7 +9,7 @@ import (
 
 func TestConsequences_PositiveFlow(t *testing.T) {
 	s := model.Scenario{Key: "expected", Revenue: 1_040_000, LoanPayment: 74_327, CashFlow: 275_673, DebtLoadPct: 7.1}
-	got := consequences(s)
+	got := Consequences(s)
 
 	if len(got) != 1 {
 		t.Fatalf("consequences = %v, want 1", got)
@@ -26,7 +26,7 @@ func TestConsequences_DeficitWithReserve(t *testing.T) {
 		CashFlow: -36_327, DebtLoadPct: 10.2,
 		ReserveAfter3M: 391_019, ReserveMonths: &months,
 	}
-	got := consequences(s)
+	got := Consequences(s)
 
 	if len(got) != 2 {
 		t.Fatalf("consequences = %v, want 2", got)
@@ -46,7 +46,7 @@ func TestConsequences_ReserveExhausted(t *testing.T) {
 		CashFlow: -36_327, DebtLoadPct: 10.2,
 		ReserveAfter3M: -9_000, ReserveMonths: &months,
 	}
-	got := consequences(s)
+	got := Consequences(s)
 
 	found := false
 	for _, c := range got {
@@ -61,7 +61,7 @@ func TestConsequences_ReserveExhausted(t *testing.T) {
 
 func TestConsequences_HighDebtLoad(t *testing.T) {
 	s := model.Scenario{Key: "expected", Revenue: 300_000, LoanPayment: 74_327, CashFlow: 25_673, DebtLoadPct: 24.8}
-	got := consequences(s)
+	got := Consequences(s)
 
 	found := false
 	for _, c := range got {
@@ -83,7 +83,7 @@ func TestConsequences_NoAdviceWords(t *testing.T) {
 		CashFlow: -36_327, DebtLoadPct: 20.5,
 		ReserveAfter3M: -9_000, ReserveMonths: &months,
 	}
-	for _, c := range consequences(s) {
+	for _, c := range Consequences(s) {
 		lower := strings.ToLower(c)
 		for _, f := range forbidden {
 			if strings.Contains(lower, f) {

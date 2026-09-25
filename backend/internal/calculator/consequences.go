@@ -6,9 +6,11 @@ import (
 	"github.com/KevinMarklin/decision-pause/backend/internal/model"
 )
 
-// consequences — правила → тексты последствий.
+// Consequences — правила → тексты последствий.
 // Формулировки констатируют факт, не содержат советов «делай / не делай».
-func consequences(s model.Scenario) []string {
+// Чистая функция: зависит только от числовых полей сценария, поэтому
+// пересчитывается и при записи, и при чтении из БД.
+func Consequences(s model.Scenario) []string {
 	var out []string
 
 	if s.CashFlow < 0 {

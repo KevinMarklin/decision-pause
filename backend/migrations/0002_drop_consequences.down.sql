@@ -1,0 +1,1 @@
+ALTER TABLE scenarios ADD COLUMN consequences JSONB NOT NULL DEFAULT '[]';

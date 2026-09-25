@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -53,17 +52,13 @@ func (r *DecisionRepo) Create(ctx context.Context, d *model.Decision) error {
 	}
 
 	for _, s := range d.Result.Scenarios {
-		consequences, err := json.Marshal(s.Consequences)
-		if err != nil {
-			return fmt.Errorf("marshal consequences: %w", err)
-		}
 		_, err = tx.Exec(ctx, `
 			INSERT INTO scenarios (
 				decision_id, type, revenue, expenses, loan_payment, cash_flow,
-				debt_load_pct, reserve_after_3m, reserve_months, consequences
-			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+				debt_load_pct, reserve_after_3m, reserve_months
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 			d.ID, s.Key, s.Revenue, s.Expenses, s.LoanPayment, s.CashFlow,
-			s.DebtLoadPct, s.ReserveAfter3M, s.ReserveMonths, consequences,
+			s.DebtLoadPct, s.ReserveAfter3M, s.ReserveMonths,
 		)
 		if err != nil {
 			return fmt.Errorf("insert scenario %s: %w", s.Key, err)
@@ -103,7 +98,7 @@ func (r *DecisionRepo) Get(ctx context.Context, id string) (model.Decision, erro
 
 	rows, err := r.pool.Query(ctx, `
 		SELECT type, revenue, expenses, loan_payment, cash_flow,
-		       debt_load_pct, reserve_after_3m, reserve_months, consequences
+		       debt_load_pct, reserve_after_3m, reserve_months
 		FROM scenarios
 		WHERE decision_id = $1
 		ORDER BY CASE type
@@ -121,15 +116,11 @@ func (r *DecisionRepo) Get(ctx context.Context, id string) (model.Decision, erro
 	d.Result.Scenarios = make([]model.Scenario, 0, 3)
 	for rows.Next() {
 		var s model.Scenario
-		var consequences []byte
 		if err := rows.Scan(
 			&s.Key, &s.Revenue, &s.Expenses, &s.LoanPayment, &s.CashFlow,
-			&s.DebtLoadPct, &s.ReserveAfter3M, &s.ReserveMonths, &consequences,
+			&s.DebtLoadPct, &s.ReserveAfter3M, &s.ReserveMonths,
 		); err != nil {
 			return model.Decision{}, fmt.Errorf("scan scenario: %w", err)
-		}
-		if err := json.Unmarshal(consequences, &s.Consequences); err != nil {
-			return model.Decision{}, fmt.Errorf("unmarshal consequences: %w", err)
 		}
 		d.Result.Scenarios = append(d.Result.Scenarios, s)
 	}
@@ -195,4 +186,25 @@ func (r *DecisionRepo) List(ctx context.Context, maxUserID *int64, limit int) ([
 		out = append(out, *byID[id])
 	}
 	return out, rows.Err()
+}
+
+// Ping — для /health: жив ли пул соединений с БД.
+func (r *DecisionRepo) Ping(ctx context.Context) error {
+	return r.pool.Ping(ctx)
+}
+
+// Delete — удаляет анализ. Возвращает ok=false, если записи нет либо она
+// принадлежит другому пользователю (внешне это неотличимо от 404).
+// maxUserID=nil (dev без заголовка) снимает проверку владельца.
+func (r *DecisionRepo) Delete(ctx context.Context, id string, maxUserID *int64) (bool, error) {
+	tag, err := r.pool.Exec(ctx, `
+		DELETE FROM decisions
+		WHERE id = $1
+		  AND ($2::bigint IS NULL OR max_user_id IS NULL OR max_user_id = $2)`,
+		id, maxUserID,
+	)
+	if err != nil {
+		return false, fmt.Errorf("delete decision: %w", err)
+	}
+	return tag.RowsAffected() > 0, nil
 }

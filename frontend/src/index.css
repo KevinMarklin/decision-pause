@@ -180,3 +180,23 @@ button {
   color: var(--red);
   font-size: 13px;
 }
+
+/* --- экран проверки --- */
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.review-row > span:last-child {
+  font-weight: 600;
+  text-align: right;
+}

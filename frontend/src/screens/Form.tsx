@@ -1,56 +1,19 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import type { Inputs } from '../api/types'
+import {
+  EMPTY_VALUES,
+  FIELDS,
+  parseNumber,
+  type FieldErrors,
+  type FormValues,
+} from '../fields'
 import { useStore } from '../store'
 
-// Значения полей — строки (controlled input); числа парсим при сабмите.
-type FormValues = Record<keyof Inputs, string>
-
-type FieldErrors = Partial<Record<keyof Inputs, string>>
-
-const EMPTY: FormValues = {
-  loan_amount: '',
-  loan_term_months: '',
-  interest_rate_pct: '',
-  revenue: '',
-  expenses: '',
-  reserve: '',
-  revenue_growth_pct: '',
-  expense_growth_pct: '',
-  purpose: '',
-}
-
-interface FieldDef {
-  name: keyof Inputs
-  label: string
-  unit?: string
-  placeholder?: string
-  inputMode: 'numeric' | 'decimal' | 'text'
-  integer?: boolean
-}
-
-// Порядок = порядок в анкете. Правила идентичны backend/internal/service.Validate
-// (сообщения совпадают дословно — серверная ошибка не будет сюрпризом).
-const FIELDS: FieldDef[] = [
-  { name: 'loan_amount', label: 'Сумма кредита', unit: '₽', placeholder: '2000000', inputMode: 'numeric', integer: true },
-  { name: 'loan_term_months', label: 'Срок кредита', unit: 'мес', placeholder: '36', inputMode: 'numeric', integer: true },
-  { name: 'interest_rate_pct', label: 'Ставка', unit: '%', placeholder: '20', inputMode: 'decimal' },
-  { name: 'revenue', label: 'Выручка в месяц', unit: '₽', placeholder: '800000', inputMode: 'numeric', integer: true },
-  { name: 'expenses', label: 'Расходы в месяц', unit: '₽', placeholder: '600000', inputMode: 'numeric', integer: true },
-  { name: 'reserve', label: 'Резерв', unit: '₽', placeholder: '500000', inputMode: 'numeric', integer: true },
-  { name: 'revenue_growth_pct', label: 'Рост выручки за 3 мес.', unit: '%', placeholder: '30', inputMode: 'decimal' },
-  { name: 'expense_growth_pct', label: 'Рост расходов за 3 мес.', unit: '%', placeholder: '15', inputMode: 'decimal' },
-  { name: 'purpose', label: 'Цель кредита', placeholder: 'Закупка оборудования', inputMode: 'text' },
-]
-
-function parse(v: string): number {
-  return Number(v.trim().replace(',', '.'))
-}
-
-// validate — те же правила, что у бэкенда (см. api.md).
+// validate — те же правила, что у бэкенда (см. api.md, service.Validate).
 function validate(values: FormValues): FieldErrors {
   const e: FieldErrors = {}
-  const num = (name: keyof Inputs): number => parse(values[name])
+  const num = (name: keyof Inputs): number => parseNumber(values[name])
 
   const amount = num('loan_amount')
   if (!Number.isFinite(amount) || amount <= 0) e.loan_amount = 'должна быть больше 0'
@@ -85,22 +48,39 @@ function validate(values: FormValues): FieldErrors {
 
 function toInputs(v: FormValues): Inputs {
   return {
-    loan_amount: parse(v.loan_amount),
-    loan_term_months: parse(v.loan_term_months),
-    interest_rate_pct: parse(v.interest_rate_pct),
-    revenue: parse(v.revenue),
-    expenses: parse(v.expenses),
-    reserve: parse(v.reserve),
-    revenue_growth_pct: parse(v.revenue_growth_pct),
-    expense_growth_pct: parse(v.expense_growth_pct),
+    loan_amount: parseNumber(v.loan_amount),
+    loan_term_months: parseNumber(v.loan_term_months),
+    interest_rate_pct: parseNumber(v.interest_rate_pct),
+    revenue: parseNumber(v.revenue),
+    expenses: parseNumber(v.expenses),
+    reserve: parseNumber(v.reserve),
+    revenue_growth_pct: parseNumber(v.revenue_growth_pct),
+    expense_growth_pct: parseNumber(v.expense_growth_pct),
     purpose: v.purpose.trim(),
+  }
+}
+
+// «Изменить» на экране проверки должно возвращать заполненную форму.
+function fromInputs(ini: Inputs): FormValues {
+  return {
+    loan_amount: String(ini.loan_amount),
+    loan_term_months: String(ini.loan_term_months),
+    interest_rate_pct: String(ini.interest_rate_pct),
+    revenue: String(ini.revenue),
+    expenses: String(ini.expenses),
+    reserve: String(ini.reserve),
+    revenue_growth_pct: String(ini.revenue_growth_pct),
+    expense_growth_pct: String(ini.expense_growth_pct),
+    purpose: ini.purpose,
   }
 }
 
 export default function Form() {
   const navigate = useNavigate()
-  const { setDraft } = useStore()
-  const [values, setValues] = useState<FormValues>(EMPTY)
+  const { draft, setDraft } = useStore()
+  const [values, setValues] = useState<FormValues>(() =>
+    draft ? fromInputs(draft) : EMPTY_VALUES,
+  )
   const [errors, setErrors] = useState<FieldErrors>({})
 
   function onSubmit(e: FormEvent) {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { deleteDecision, listDecisions } from '../api/client'
 import type { HistoryItem } from '../api/types'
@@ -7,20 +7,24 @@ import { dateRu, money, signedMoney } from '../format'
 export default function History() {
   const [items, setItems] = useState<HistoryItem[] | null>(null)
   const [error, setError] = useState(false)
-
-  const load = useCallback(async () => {
-    try {
-      const res = await listDecisions(20)
-      setItems(res.items)
-      setError(false)
-    } catch {
-      setError(true)
-    }
-  }, [])
+  const [tick, setTick] = useState(0)
 
   useEffect(() => {
-    void load()
-  }, [load])
+    let cancelled = false
+    listDecisions(20)
+      .then((res) => {
+        if (!cancelled) {
+          setItems(res.items)
+          setError(false)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setError(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [tick])
 
   async function remove(id: string) {
     try {
@@ -41,7 +45,7 @@ export default function History() {
       {error ? (
         <>
           <p className="field-error">Не удалось загрузить историю.</p>
-          <button className="btn" onClick={() => void load()}>
+          <button className="btn" onClick={() => setTick((t) => t + 1)}>
             Повторить
           </button>
         </>

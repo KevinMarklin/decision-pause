@@ -15,5 +15,23 @@ services:
       timeout: 3s
       retries: 20
 
+  app:
+    image: golang:alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=anti
+      - DB_PASSWORD=anti
+      - DB_NAME=antipulse
+    env_file:
+      - .env
+    command: go run ./cmd/server/main.go
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   pgdata:

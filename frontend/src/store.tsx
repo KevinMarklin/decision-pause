@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
-import type { Decision, Inputs } from './api/types'
+import type { Decision, Inputs, ScenarioKey } from './api/types'
 
 // Общий стейт пути «анкета → проверка → результат»: данные живут в памяти,
 // на перезагрузку их не восстанавливаем (расчёт — быстрый снимок).
@@ -8,6 +8,8 @@ interface Store {
   setDraft: (d: Inputs) => void
   decision: Decision | null
   setDecision: (d: Decision | null) => void
+  scenarioKey: ScenarioKey | null
+  setScenarioKey: (k: ScenarioKey | null) => void
 }
 
 const StoreContext = createContext<Store | null>(null)
@@ -15,8 +17,11 @@ const StoreContext = createContext<Store | null>(null)
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [draft, setDraft] = useState<Inputs | null>(null)
   const [decision, setDecision] = useState<Decision | null>(null)
+  const [scenarioKey, setScenarioKey] = useState<ScenarioKey | null>(null)
   return (
-    <StoreContext.Provider value={{ draft, setDraft, decision, setDecision }}>
+    <StoreContext.Provider
+      value={{ draft, setDraft, decision, setDecision, scenarioKey, setScenarioKey }}
+    >
       {children}
     </StoreContext.Provider>
   )

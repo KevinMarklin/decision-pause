@@ -200,3 +200,39 @@ button {
   font-weight: 600;
   text-align: right;
 }
+
+/* --- результат: блоки и сценарии --- */
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.flow-pos {
+  color: var(--green);
+}
+
+.flow-neg {
+  color: var(--red);
+}
+
+.scenario-expected {
+  border-left: 4px solid var(--green);
+}
+
+.scenario-moderate {
+  border-left: 4px solid var(--yellow);
+}
+
+.scenario-negative {
+  border-left: 4px solid var(--red);
+}

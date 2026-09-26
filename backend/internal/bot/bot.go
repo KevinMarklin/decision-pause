@@ -38,10 +38,11 @@ func Run(ctx context.Context, token, miniApp, miniAppURL string) error {
 	}
 
 	// проверка токена и связи с API на старте
-	if _, err := api.Bots.GetBot(ctx); err != nil {
+	botInfo, err := api.Bots.GetBot(ctx)
+	if err != nil {
 		return fmt.Errorf("bot api check: %w", err)
 	}
-	slog.Info("max bot: connected, long polling started")
+	slog.Info("max bot: connected, long polling started", "name", botInfo.Name, "username", botInfo.Username)
 
 	for update := range api.GetUpdates(ctx) {
 		switch upd := update.(type) {

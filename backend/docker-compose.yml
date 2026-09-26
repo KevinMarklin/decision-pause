@@ -21,15 +21,17 @@ services:
       dockerfile: backend/Dockerfile
     ports:
       - "8080:8080"
+    # Секреты и токены — из backend/.env (как задумал напарник);
+    # отсутствие файла не валит запуск (required: false).
+    env_file:
+      - path: .env
+        required: false
+    # Переменные ниже имеют приоритет над env_file:
+    # внутри контейнера адрес БД — не localhost.
     environment:
       PORT: "8080"
       DATABASE_URL: postgres://anti:anti@postgres:5432/antipulse?sslmode=disable
       FRONTEND_DIST: /app/dist
-      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN:-}
-      MAX_MINI_APP_NAME: ${MAX_MINI_APP_NAME:-}
-      MAX_MINI_APP_URL: ${MAX_MINI_APP_URL:-}
-      MAX_REQUIRE_INIT_DATA: ${MAX_REQUIRE_INIT_DATA:-false}
-      CORS_ORIGINS: ${CORS_ORIGINS:-}
     depends_on:
       postgres:
         condition: service_healthy

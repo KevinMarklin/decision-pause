@@ -273,3 +273,32 @@ button {
   accent-color: var(--accent);
   flex-shrink: 0;
 }
+
+/* --- история --- */
+
+.history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-flows {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.icon-btn:hover {
+  background: var(--accent-bg);
+  color: var(--red);
+}

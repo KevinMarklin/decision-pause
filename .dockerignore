@@ -1,0 +1,8 @@
+# Контекст сборки — корень репозитория.
+.git
+**/node_modules
+frontend/dist
+backend/bin
+**/.env
+*.log
+*.pid

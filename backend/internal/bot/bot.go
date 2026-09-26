@@ -111,9 +111,11 @@ func httpClientWithMaxCA() (*http.Client, error) {
 }
 
 func send(ctx context.Context, api *maxbot.Api, chatID int64, msg *maxbot.Message) {
-	if err := api.Messages.Send(ctx, msg); err != nil {
+	res, err := api.Messages.SendWithResult(ctx, msg)
+	if err != nil {
 		slog.Warn("bot: send failed", "chat_id", chatID, "err", err)
 		return
 	}
-	slog.Info("bot: sent", "chat_id", chatID)
+	// что реально сохранил сервер (проверка обрезки многострочного текста)
+	slog.Info("bot: sent", "chat_id", chatID, "text", res.Body.Text)
 }

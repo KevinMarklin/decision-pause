@@ -1,6 +1,6 @@
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+﻿import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { money, pct, signedMoney } from '../format'
-import { useStore } from '../store'
+import { useStore } from '../useStore'
 
 export default function Result() {
   const navigate = useNavigate()
@@ -12,24 +12,24 @@ export default function Result() {
   return (
     <main className="screen">
       <Link className="nav-link" to="/">
-        ← На главную
+        в†ђ РќР° РіР»Р°РІРЅСѓСЋ
       </Link>
-      <h1>Результат</h1>
+      <h1>Р РµР·СѓР»СЊС‚Р°С‚</h1>
 
       <section className="card">
-        <h2>💳 Кредит</h2>
+        <h2>рџ’і РљСЂРµРґРёС‚</h2>
         <div className="rows">
           <div className="row">
-            <span className="muted">Платёж в месяц</span>
-            <strong>{money(credit.monthly_payment)} ₽</strong>
+            <span className="muted">РџР»Р°С‚С‘Р¶ РІ РјРµСЃСЏС†</span>
+            <strong>{money(credit.monthly_payment)} в‚Ѕ</strong>
           </div>
           <div className="row">
-            <span className="muted">Всего выплат</span>
-            <strong>{money(credit.total_paid)} ₽</strong>
+            <span className="muted">Р’СЃРµРіРѕ РІС‹РїР»Р°С‚</span>
+            <strong>{money(credit.total_paid)} в‚Ѕ</strong>
           </div>
           <div className="row">
-            <span className="muted">Переплата</span>
-            <strong>{money(credit.overpay)} ₽</strong>
+            <span className="muted">РџРµСЂРµРїР»Р°С‚Р°</span>
+            <strong>{money(credit.overpay)} в‚Ѕ</strong>
           </div>
         </div>
       </section>
@@ -41,35 +41,35 @@ export default function Result() {
           </h2>
           <div className="rows">
             <div className="row">
-              <span className="muted">Выручка</span>
-              <span>{money(s.revenue)} ₽</span>
+              <span className="muted">Р’С‹СЂСѓС‡РєР°</span>
+              <span>{money(s.revenue)} в‚Ѕ</span>
             </div>
             <div className="row">
-              <span className="muted">Расходы</span>
-              <span>{money(s.expenses)} ₽</span>
+              <span className="muted">Р Р°СЃС…РѕРґС‹</span>
+              <span>{money(s.expenses)} в‚Ѕ</span>
             </div>
             <div className="row">
-              <span className="muted">Платёж по кредиту</span>
-              <span>{money(s.loan_payment)} ₽</span>
+              <span className="muted">РџР»Р°С‚С‘Р¶ РїРѕ РєСЂРµРґРёС‚Сѓ</span>
+              <span>{money(s.loan_payment)} в‚Ѕ</span>
             </div>
             <div className="row">
-              <span className="muted">Свободный поток</span>
+              <span className="muted">РЎРІРѕР±РѕРґРЅС‹Р№ РїРѕС‚РѕРє</span>
               <strong className={s.cash_flow < 0 ? 'flow-neg' : 'flow-pos'}>
-                {signedMoney(s.cash_flow)} ₽/мес
+                {signedMoney(s.cash_flow)} в‚Ѕ/РјРµСЃ
               </strong>
             </div>
             <div className="row">
-              <span className="muted">Долговая нагрузка</span>
+              <span className="muted">Р”РѕР»РіРѕРІР°СЏ РЅР°РіСЂСѓР·РєР°</span>
               <span>{pct(s.debt_load_pct)}</span>
             </div>
             <div className="row">
-              <span className="muted">Резерв через 3 мес.</span>
-              <span>{money(s.reserve_after_3m)} ₽</span>
+              <span className="muted">Р РµР·РµСЂРІ С‡РµСЂРµР· 3 РјРµСЃ.</span>
+              <span>{money(s.reserve_after_3m)} в‚Ѕ</span>
             </div>
             {s.reserve_months !== null ? (
               <div className="row">
-                <span className="muted">Резерва хватит на</span>
-                <span>{s.reserve_months} мес.</span>
+                <span className="muted">Р РµР·РµСЂРІР° С…РІР°С‚РёС‚ РЅР°</span>
+                <span>{s.reserve_months} РјРµСЃ.</span>
               </div>
             ) : null}
           </div>
@@ -80,13 +80,13 @@ export default function Result() {
               navigate('/consequences')
             }}
           >
-            Последствия →
+            РџРѕСЃР»РµРґСЃС‚РІРёСЏ в†’
           </button>
         </section>
       ))}
 
       <Link className="btn btn-primary" to="/checklist">
-        К чек-листу →
+        Рљ С‡РµРє-Р»РёСЃС‚Сѓ в†’
       </Link>
     </main>
   )

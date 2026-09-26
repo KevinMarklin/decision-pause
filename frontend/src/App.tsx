@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { StoreProvider } from './store'
 import Home from './screens/Home'
@@ -9,6 +10,12 @@ import Checklist from './screens/Checklist'
 import History from './screens/History'
 
 export default function App() {
+  // MAX Bridge: сообщаем мессенджеру, что приложение отрисовано
+  // (в обычном браузере WebApp нет — вызов молча пропускается).
+  useEffect(() => {
+    window.WebApp?.ready?.()
+  }, [])
+
   return (
     <StoreProvider>
       <HashRouter>

@@ -9,11 +9,10 @@ export default function History() {
   const [error, setError] = useState(false)
 
   const load = useCallback(async () => {
-    setError(false)
-    setItems(null)
     try {
       const res = await listDecisions(20)
       setItems(res.items)
+      setError(false)
     } catch {
       setError(true)
     }

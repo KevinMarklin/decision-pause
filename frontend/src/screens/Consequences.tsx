@@ -1,5 +1,5 @@
-import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { useStore } from '../store'
+﻿import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { useStore } from '../useStore'
 
 export default function Consequences() {
   const navigate = useNavigate()
@@ -12,10 +12,10 @@ export default function Consequences() {
   return (
     <main className="screen">
       <Link className="nav-link" to="/result">
-        ← К результату
+        в†ђ Рљ СЂРµР·СѓР»СЊС‚Р°С‚Сѓ
       </Link>
       <h1>
-        {scenario.emoji} {scenario.title}: последствия
+        {scenario.emoji} {scenario.title}: РїРѕСЃР»РµРґСЃС‚РІРёСЏ
       </h1>
 
       <div className="card consequences">
@@ -25,7 +25,7 @@ export default function Consequences() {
       </div>
 
       <button className="btn btn-primary" onClick={() => navigate('/checklist')}>
-        Далее: чек-лист →
+        Р”Р°Р»РµРµ: С‡РµРє-Р»РёСЃС‚ в†’
       </button>
     </main>
   )

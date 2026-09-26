@@ -49,7 +49,7 @@ func main() {
 
 	if cfg.MaxBotToken != "" {
 		go func() {
-			if err := bot.Run(ctx, cfg.MaxBotToken); err != nil && ctx.Err() == nil {
+			if err := bot.Run(ctx, cfg.MaxBotToken, cfg.MaxMiniApp, cfg.MaxMiniAppURL); err != nil && ctx.Err() == nil {
 				log.Printf("max bot stopped: %v", err)
 			}
 		}()

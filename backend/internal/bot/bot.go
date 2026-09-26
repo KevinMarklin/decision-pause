@@ -25,7 +25,8 @@ const welcomeText = "🧠 Анти-импульс\n\n" +
 const hintText = "Отправьте /start, чтобы начать анализ."
 
 // Run — long polling бота. Блокирует до отмены ctx или ошибки клиента.
-func Run(ctx context.Context, token string) error {
+// miniApp / miniAppURL — кнопка «Начать анализ»: open_app либо ссылка-фолбэк.
+func Run(ctx context.Context, token, miniApp, miniAppURL string) error {
 	client, err := httpClientWithMaxCA()
 	if err != nil {
 		return fmt.Errorf("http client: %w", err)
@@ -45,10 +46,11 @@ func Run(ctx context.Context, token string) error {
 	for update := range api.GetUpdates(ctx) {
 		switch upd := update.(type) {
 		case *schemes.BotStartedUpdate:
-			send(ctx, api, upd.ChatId, welcomeMessage(upd.ChatId))
+			send(ctx, api, upd.ChatId, welcomeMessage(upd.ChatId, miniApp, miniAppURL))
 		case *schemes.MessageCreatedUpdate:
 			if upd.GetCommand() == "/start" {
-				send(ctx, api, upd.Message.Recipient.ChatId, welcomeMessage(upd.Message.Recipient.ChatId))
+				send(ctx, api, upd.Message.Recipient.ChatId,
+					welcomeMessage(upd.Message.Recipient.ChatId, miniApp, miniAppURL))
 			} else {
 				send(ctx, api, upd.Message.Recipient.ChatId,
 					maxbot.NewMessage().SetChat(upd.Message.Recipient.ChatId).SetText(hintText))
@@ -58,8 +60,25 @@ func Run(ctx context.Context, token string) error {
 	return ctx.Err()
 }
 
-func welcomeMessage(chatID int64) *maxbot.Message {
-	return maxbot.NewMessage().SetChat(chatID).SetText(welcomeText)
+const startButtonText = "▶️ Начать анализ"
+
+func welcomeMessage(chatID int64, miniApp, miniAppURL string) *maxbot.Message {
+	msg := maxbot.NewMessage().SetChat(chatID).SetText(welcomeText)
+	if btn := startButton(miniApp, miniAppURL); btn != nil {
+		msg.AddKeyboard(maxbot.InlineKeyboard(maxbot.Row(btn)))
+	}
+	return msg
+}
+
+// startButton — open_app, если задано имя мини-аппа, иначе deeplink-ссылка.
+func startButton(miniApp, miniAppURL string) schemes.ButtonInterface {
+	if miniApp != "" {
+		return maxbot.BtnApp(startButtonText, miniApp, "", 0)
+	}
+	if miniAppURL != "" {
+		return maxbot.BtnLink(startButtonText, miniAppURL)
+	}
+	return nil
 }
 
 // httpClientWithMaxCA — системный пул корневых сертификатов + сертификат Минцифры.

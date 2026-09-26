@@ -302,3 +302,31 @@ button {
   background: var(--accent-bg);
   color: var(--red);
 }
+
+/* --- адаптив под MAX (375px+ и десктоп-превью) --- */
+
+@media (max-width: 400px) {
+  #root {
+    padding: 12px calc(12px + env(safe-area-inset-right)) 
+      calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
+  }
+
+  h1 {
+    font-size: 21px;
+  }
+}
+
+@media (min-width: 560px) {
+  #root {
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn {
+  min-height: 44px; /* зона касания в MAX/телефоне */
+}

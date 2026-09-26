@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	maxbot "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
@@ -43,6 +44,13 @@ func Run(ctx context.Context, token, miniApp, miniAppURL string) error {
 		return fmt.Errorf("bot api check: %w", err)
 	}
 	slog.Info("max bot: connected, long polling started", "name", botInfo.Name, "username", botInfo.Username)
+
+	// ошибки long-poll/API иначе копятся в канале молча (буфер по умолчанию).
+	go func() {
+		for err := range api.GetErrors() {
+			slog.Warn("bot: api error", "err", err)
+		}
+	}()
 
 	for update := range api.GetUpdates(ctx) {
 		slog.Info("bot: update received", "type", fmt.Sprintf("%T", update))
@@ -97,7 +105,9 @@ func httpClientWithMaxCA() (*http.Client, error) {
 	}
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = &tls.Config{RootCAs: pool, MinVersion: tls.VersionTLS12}
-	return &http.Client{Transport: transport}, nil
+	// 40с > 30с long-poll: обычный цикл успевает, а мёртвое соединение
+	// обрывается по таймауту, а не висит бесконечно (Timeout=0 грозил зависанием).
+	return &http.Client{Transport: transport, Timeout: 40 * time.Second}, nil
 }
 
 func send(ctx context.Context, api *maxbot.Api, chatID int64, msg *maxbot.Message) {

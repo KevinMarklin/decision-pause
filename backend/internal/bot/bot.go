@@ -45,11 +45,15 @@ func Run(ctx context.Context, token, miniApp, miniAppURL string) error {
 	slog.Info("max bot: connected, long polling started", "name", botInfo.Name, "username", botInfo.Username)
 
 	for update := range api.GetUpdates(ctx) {
+		slog.Info("bot: update received", "type", fmt.Sprintf("%T", update))
 		switch upd := update.(type) {
 		case *schemes.BotStartedUpdate:
+			slog.Info("bot: started by user", "chat_id", upd.ChatId)
 			send(ctx, api, upd.ChatId, welcomeMessage(upd.ChatId, miniApp, miniAppURL))
 		case *schemes.MessageCreatedUpdate:
-			if upd.GetCommand() == "/start" {
+			cmd := upd.GetCommand()
+			slog.Info("bot: message", "chat_id", upd.Message.Recipient.ChatId, "command", cmd)
+			if cmd == "/start" {
 				send(ctx, api, upd.Message.Recipient.ChatId,
 					welcomeMessage(upd.Message.Recipient.ChatId, miniApp, miniAppURL))
 			} else {
@@ -99,5 +103,7 @@ func httpClientWithMaxCA() (*http.Client, error) {
 func send(ctx context.Context, api *maxbot.Api, chatID int64, msg *maxbot.Message) {
 	if err := api.Messages.Send(ctx, msg); err != nil {
 		slog.Warn("bot: send failed", "chat_id", chatID, "err", err)
+		return
 	}
+	slog.Info("bot: sent", "chat_id", chatID)
 }

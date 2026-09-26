@@ -5,7 +5,7 @@ import type { Decision, Inputs, ScenarioKey } from './api/types'
 // на перезагрузку их не восстанавливаем (расчёт — быстрый снимок).
 interface Store {
   draft: Inputs | null
-  setDraft: (d: Inputs) => void
+  setDraft: (d: Inputs | null) => void
   decision: Decision | null
   setDecision: (d: Decision | null) => void
   scenarioKey: ScenarioKey | null

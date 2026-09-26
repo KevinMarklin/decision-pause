@@ -43,7 +43,8 @@ func main() {
 				BotToken: cfg.MaxBotToken,
 				Require:  cfg.RequireInitData,
 			},
-			CORS: cfg.CorsOrigins,
+			CORS:         cfg.CorsOrigins,
+			FrontendDist: cfg.FrontendDist,
 		},
 	)
 

@@ -27,16 +27,19 @@ var _ Service = (*service.DecisionService)(nil)
 type Options struct {
 	Auth auth.Config
 	CORS []string // allowlist origin'ов, см. withCORS
+	// FrontendDist — каталог собранного Mini App (пусто → статика не раздаётся).
+	FrontendDist string
 }
 
 type Handler struct {
 	svc  Service
 	auth auth.Config
 	cors []string
+	dist string
 }
 
 func New(svc Service, opts Options) *Handler {
-	return &Handler{svc: svc, auth: opts.Auth, cors: opts.CORS}
+	return &Handler{svc: svc, auth: opts.Auth, cors: opts.CORS, dist: opts.FrontendDist}
 }
 
 // Routes — маршруты API (Go 1.22+ паттерны с path-параметрами).
@@ -53,6 +56,10 @@ func (h *Handler) Routes() http.Handler {
 	root := http.NewServeMux()
 	root.HandleFunc("GET /health", h.health)
 	root.Handle("/api/", auth.Middleware(api, h.auth))
+	if h.dist != "" {
+		// Паттерн без метода (конфликтует с "/api/"), GET/HEAD проверяет сам staticHandler.
+		root.Handle("/", staticHandler(h.dist))
+	}
 
 	var out http.Handler = root
 	out = withCORS(h.cors)(out)

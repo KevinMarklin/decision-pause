@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"time"
 
 	maxbot "github.com/max-messenger/max-bot-api-client-go"
 	"github.com/max-messenger/max-bot-api-client-go/schemes"
@@ -25,7 +26,8 @@ const welcomeText = "🧠 Анти-импульс\n\n" +
 const hintText = "Отправьте /start, чтобы начать анализ."
 
 // Run — long polling бота. Блокирует до отмены ctx или ошибки клиента.
-func Run(ctx context.Context, token string) error {
+// miniApp / miniAppURL — кнопка «Начать анализ»: open_app либо ссылка-фолбэк.
+func Run(ctx context.Context, token, miniApp, miniAppURL string) error {
 	client, err := httpClientWithMaxCA()
 	if err != nil {
 		return fmt.Errorf("http client: %w", err)
@@ -43,13 +45,25 @@ func Run(ctx context.Context, token string) error {
 	}
 	slog.Info("max bot: connected, long polling started", "name", botInfo.Name, "username", botInfo.Username)
 
+	// ошибки long-poll/API иначе копятся в канале молча (буфер по умолчанию).
+	go func() {
+		for err := range api.GetErrors() {
+			slog.Warn("bot: api error", "err", err)
+		}
+	}()
+
 	for update := range api.GetUpdates(ctx) {
+		slog.Info("bot: update received", "type", fmt.Sprintf("%T", update))
 		switch upd := update.(type) {
 		case *schemes.BotStartedUpdate:
-			send(ctx, api, upd.ChatId, welcomeMessage(upd.ChatId))
+			slog.Info("bot: started by user", "chat_id", upd.ChatId)
+			send(ctx, api, upd.ChatId, welcomeMessage(upd.ChatId, miniApp, miniAppURL))
 		case *schemes.MessageCreatedUpdate:
-			if upd.GetCommand() == "/start" {
-				send(ctx, api, upd.Message.Recipient.ChatId, welcomeMessage(upd.Message.Recipient.ChatId))
+			cmd := upd.GetCommand()
+			slog.Info("bot: message", "chat_id", upd.Message.Recipient.ChatId, "command", cmd)
+			if cmd == "/start" {
+				send(ctx, api, upd.Message.Recipient.ChatId,
+					welcomeMessage(upd.Message.Recipient.ChatId, miniApp, miniAppURL))
 			} else {
 				send(ctx, api, upd.Message.Recipient.ChatId,
 					maxbot.NewMessage().SetChat(upd.Message.Recipient.ChatId).SetText(hintText))
@@ -59,8 +73,25 @@ func Run(ctx context.Context, token string) error {
 	return ctx.Err()
 }
 
-func welcomeMessage(chatID int64) *maxbot.Message {
-	return maxbot.NewMessage().SetChat(chatID).SetText(welcomeText)
+const startButtonText = "▶️ Начать анализ"
+
+func welcomeMessage(chatID int64, miniApp, miniAppURL string) *maxbot.Message {
+	msg := maxbot.NewMessage().SetChat(chatID).SetText(welcomeText)
+	if btn := startButton(miniApp, miniAppURL); btn != nil {
+		msg.AddKeyboard(maxbot.InlineKeyboard(maxbot.Row(btn)))
+	}
+	return msg
+}
+
+// startButton — open_app, если задано имя мини-аппа, иначе deeplink-ссылка.
+func startButton(miniApp, miniAppURL string) schemes.ButtonInterface {
+	if miniApp != "" {
+		return maxbot.BtnApp(startButtonText, miniApp, "", 0)
+	}
+	if miniAppURL != "" {
+		return maxbot.BtnLink(startButtonText, miniAppURL)
+	}
+	return nil
 }
 
 // httpClientWithMaxCA — системный пул корневых сертификатов + сертификат Минцифры.
@@ -74,11 +105,17 @@ func httpClientWithMaxCA() (*http.Client, error) {
 	}
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig = &tls.Config{RootCAs: pool, MinVersion: tls.VersionTLS12}
-	return &http.Client{Transport: transport}, nil
+	// 40с > 30с long-poll: обычный цикл успевает, а мёртвое соединение
+	// обрывается по таймауту, а не висит бесконечно (Timeout=0 грозил зависанием).
+	return &http.Client{Transport: transport, Timeout: 40 * time.Second}, nil
 }
 
 func send(ctx context.Context, api *maxbot.Api, chatID int64, msg *maxbot.Message) {
-	if err := api.Messages.Send(ctx, msg); err != nil {
+	res, err := api.Messages.SendWithResult(ctx, msg)
+	if err != nil {
 		slog.Warn("bot: send failed", "chat_id", chatID, "err", err)
+		return
 	}
+	// что реально сохранил сервер (проверка обрезки многострочного текста)
+	slog.Info("bot: sent", "chat_id", chatID, "text", res.Body.Text)
 }

@@ -43,13 +43,14 @@ func main() {
 				BotToken: cfg.MaxBotToken,
 				Require:  cfg.RequireInitData,
 			},
-			CORS: cfg.CorsOrigins,
+			CORS:         cfg.CorsOrigins,
+			FrontendDist: cfg.FrontendDist,
 		},
 	)
 
 	if cfg.MaxBotToken != "" {
 		go func() {
-			if err := bot.Run(ctx, cfg.MaxBotToken); err != nil && ctx.Err() == nil {
+			if err := bot.Run(ctx, cfg.MaxBotToken, cfg.MaxMiniApp, cfg.MaxMiniAppURL); err != nil && ctx.Err() == nil {
 				log.Printf("max bot stopped: %v", err)
 			}
 		}()

@@ -16,22 +16,30 @@ services:
       retries: 20
 
   app:
-    image: golang:alpine
-    working_dir: /app
-    volumes:
-      - .:/app
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=anti
-      - DB_PASSWORD=anti
-      - DB_NAME=antipulse
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8080:8080"
+    # Секреты и токены — из backend/.env (как задумал напарник);
+    # отсутствие файла не валит запуск (required: false).
     env_file:
-      - .env
-    command: go run ./cmd/server/main.go
+      - path: .env
+        required: false
+    # Переменные ниже имеют приоритет над env_file:
+    # внутри контейнера адрес БД — не localhost.
+    environment:
+      PORT: "8080"
+      DATABASE_URL: postgres://anti:anti@postgres:5432/antipulse?sslmode=disable
+      FRONTEND_DIST: /app/dist
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
 
 volumes:
   pgdata:

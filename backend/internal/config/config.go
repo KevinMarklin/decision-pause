@@ -19,6 +19,13 @@ type Config struct {
 
 	// CorsOrigins — allowlist origin'ов для Mini App (пусто = CORS выключен).
 	CorsOrigins []string
+
+	// MaxMiniApp — имя мини-аппа у бота (кнопка open_app).
+	MaxMiniApp string
+	// MaxMiniAppURL — deeplink мини-аппа (fallback-кнопка link).
+	MaxMiniAppURL string
+	// FrontendDist — путь к собранному фронтенду (пусто → статика не раздаётся).
+	FrontendDist string
 }
 
 func Load() (Config, error) {
@@ -29,6 +36,9 @@ func Load() (Config, error) {
 		MaxBotToken:     env("MAX_BOT_TOKEN", ""),
 		RequireInitData: envBool("MAX_REQUIRE_INIT_DATA", false),
 		CorsOrigins:     splitList(env("CORS_ORIGINS", "")),
+		MaxMiniApp:      env("MAX_MINI_APP_NAME", ""),
+		MaxMiniAppURL:   env("MAX_MINI_APP_URL", ""),
+		FrontendDist:    env("FRONTEND_DIST", ""),
 	}
 	if err := cfg.Validate(); err != nil {
 		return Config{}, err

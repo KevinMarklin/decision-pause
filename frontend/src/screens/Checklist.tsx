@@ -25,11 +25,11 @@ export default function Checklist() {
   return (
     <main className="screen">
       <Link className="nav-link" to="/result">
-        в†ђ Рљ СЂРµР·СѓР»СЊС‚Р°С‚Сѓ
+        ← К результату
       </Link>
-      <h1>Р§РµРє-Р»РёСЃС‚ РїРµСЂРµРґ СЂРµС€РµРЅРёРµРј</h1>
+      <h1>Чек-лист перед решением</h1>
       <p className="disclaimer">
-        РћС‚РІРµС‚СЊС‚Рµ РЅР° РІРѕРїСЂРѕСЃС‹ С‡РµСЃС‚РЅРѕ вЂ” СЌС‚Рѕ РїРѕСЃР»РµРґРЅРёР№ С€Р°Рі РїРµСЂРµРґ С‚РµРј, РєР°Рє СЂРµС€РёС‚СЊ.
+        Ответьте на вопросы честно — это последний шаг перед тем, как решить.
       </p>
 
       <div className="card checklist">
@@ -46,7 +46,7 @@ export default function Checklist() {
       </div>
 
       <button className="btn btn-primary" onClick={finish}>
-        Р—Р°РІРµСЂС€РёС‚СЊ Р°РЅР°Р»РёР·
+        Завершить анализ
       </button>
     </main>
   )

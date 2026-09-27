@@ -12,24 +12,24 @@ export default function Result() {
   return (
     <main className="screen">
       <Link className="nav-link" to="/">
-        в†ђ РќР° РіР»Р°РІРЅСѓСЋ
+        ← На главную
       </Link>
-      <h1>Р РµР·СѓР»СЊС‚Р°С‚</h1>
+      <h1>Результат</h1>
 
       <section className="card">
-        <h2>рџ’і РљСЂРµРґРёС‚</h2>
+        <h2>💳 Кредит</h2>
         <div className="rows">
           <div className="row">
-            <span className="muted">РџР»Р°С‚С‘Р¶ РІ РјРµСЃСЏС†</span>
-            <strong>{money(credit.monthly_payment)} в‚Ѕ</strong>
+            <span className="muted">Платёж в месяц</span>
+            <strong>{money(credit.monthly_payment)} ₽</strong>
           </div>
           <div className="row">
-            <span className="muted">Р’СЃРµРіРѕ РІС‹РїР»Р°С‚</span>
-            <strong>{money(credit.total_paid)} в‚Ѕ</strong>
+            <span className="muted">Всего выплат</span>
+            <strong>{money(credit.total_paid)} ₽</strong>
           </div>
           <div className="row">
-            <span className="muted">РџРµСЂРµРїР»Р°С‚Р°</span>
-            <strong>{money(credit.overpay)} в‚Ѕ</strong>
+            <span className="muted">Переплата</span>
+            <strong>{money(credit.overpay)} ₽</strong>
           </div>
         </div>
       </section>
@@ -41,35 +41,35 @@ export default function Result() {
           </h2>
           <div className="rows">
             <div className="row">
-              <span className="muted">Р’С‹СЂСѓС‡РєР°</span>
-              <span>{money(s.revenue)} в‚Ѕ</span>
+              <span className="muted">Выручка</span>
+              <span>{money(s.revenue)} ₽</span>
             </div>
             <div className="row">
-              <span className="muted">Р Р°СЃС…РѕРґС‹</span>
-              <span>{money(s.expenses)} в‚Ѕ</span>
+              <span className="muted">Расходы</span>
+              <span>{money(s.expenses)} ₽</span>
             </div>
             <div className="row">
-              <span className="muted">РџР»Р°С‚С‘Р¶ РїРѕ РєСЂРµРґРёС‚Сѓ</span>
-              <span>{money(s.loan_payment)} в‚Ѕ</span>
+              <span className="muted">Платёж по кредиту</span>
+              <span>{money(s.loan_payment)} ₽</span>
             </div>
             <div className="row">
-              <span className="muted">РЎРІРѕР±РѕРґРЅС‹Р№ РїРѕС‚РѕРє</span>
+              <span className="muted">Свободный поток</span>
               <strong className={s.cash_flow < 0 ? 'flow-neg' : 'flow-pos'}>
-                {signedMoney(s.cash_flow)} в‚Ѕ/РјРµСЃ
+                {signedMoney(s.cash_flow)} ₽/мес
               </strong>
             </div>
             <div className="row">
-              <span className="muted">Р”РѕР»РіРѕРІР°СЏ РЅР°РіСЂСѓР·РєР°</span>
+              <span className="muted">Долговая нагрузка</span>
               <span>{pct(s.debt_load_pct)}</span>
             </div>
             <div className="row">
-              <span className="muted">Р РµР·РµСЂРІ С‡РµСЂРµР· 3 РјРµСЃ.</span>
-              <span>{money(s.reserve_after_3m)} в‚Ѕ</span>
+              <span className="muted">Резерв через 3 мес.</span>
+              <span>{money(s.reserve_after_3m)} ₽</span>
             </div>
             {s.reserve_months !== null ? (
               <div className="row">
-                <span className="muted">Р РµР·РµСЂРІР° С…РІР°С‚РёС‚ РЅР°</span>
-                <span>{s.reserve_months} РјРµСЃ.</span>
+                <span className="muted">Резерва хватит на</span>
+                <span>{s.reserve_months} мес.</span>
               </div>
             ) : null}
           </div>
@@ -80,13 +80,13 @@ export default function Result() {
               navigate('/consequences')
             }}
           >
-            РџРѕСЃР»РµРґСЃС‚РІРёСЏ в†’
+            Последствия →
           </button>
         </section>
       ))}
 
       <Link className="btn btn-primary" to="/checklist">
-        Рљ С‡РµРє-Р»РёСЃС‚Сѓ в†’
+        К чек-листу →
       </Link>
     </main>
   )

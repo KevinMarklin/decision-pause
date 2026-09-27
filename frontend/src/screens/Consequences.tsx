@@ -12,10 +12,10 @@ export default function Consequences() {
   return (
     <main className="screen">
       <Link className="nav-link" to="/result">
-        в†ђ Рљ СЂРµР·СѓР»СЊС‚Р°С‚Сѓ
+        ← К результату
       </Link>
       <h1>
-        {scenario.emoji} {scenario.title}: РїРѕСЃР»РµРґСЃС‚РІРёСЏ
+        {scenario.emoji} {scenario.title}: последствия
       </h1>
 
       <div className="card consequences">
@@ -25,7 +25,7 @@ export default function Consequences() {
       </div>
 
       <button className="btn btn-primary" onClick={() => navigate('/checklist')}>
-        Р”Р°Р»РµРµ: С‡РµРє-Р»РёСЃС‚ в†’
+        Далее: чек-лист →
       </button>
     </main>
   )

@@ -1,11 +1,14 @@
 package bot
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	_ "embed"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -79,13 +82,10 @@ func Run(ctx context.Context, token, miniApp, miniAppURL string) error {
 	}
 	slog.Info("max bot: connected, long polling started", "name", botInfo.Name, "username", botInfo.Username)
 
-	// меню команд в интерфейсе чата (/start, /help) — не фатально при ошибке
-	if _, err := api.Bots.PatchBot(ctx, &schemes.BotPatch{
-		Commands: []schemes.BotCommand{
-			{Name: "start", Description: "Начать анализ"},
-			{Name: "help", Description: "Справка по боту"},
-		},
-	}); err != nil {
+	// меню команд в интерфейсе чата (/start, /help) — не фатально при ошибке.
+	// Прямой вызов: библиотека шлёт PATCH /me, который API больше не знает,
+	// актуальный метод — PATCH /me/commands (см. dev.max.ru/docs-api).
+	if err := setCommands(ctx, client, token); err != nil {
 		slog.Warn("bot: set commands menu failed", "err", err)
 	} else {
 		slog.Info("bot: commands menu updated")
@@ -129,6 +129,37 @@ func startButton(miniApp, miniAppURL string) schemes.ButtonInterface {
 	}
 	if miniAppURL != "" {
 		return maxbot.BtnLink(startButtonText, miniAppURL)
+	}
+	return nil
+}
+
+// maxAPIBase — актуальный домен API MAX (platform-api устарел).
+const maxAPIBase = "https://platform-api2.max.ru"
+
+// setCommands — PATCH /me/commands: команды в подсказке «/» у бота.
+func setCommands(ctx context.Context, client *http.Client, token string) error {
+	body, err := json.Marshal(map[string]any{"commands": []schemes.BotCommand{
+		{Name: "start", Description: "Начать анализ"},
+		{Name: "help", Description: "Справка по боту"},
+	}})
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, maxAPIBase+"/me/commands", bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		msg, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		return fmt.Errorf("PATCH /me/commands: %s: %s", resp.Status, msg)
 	}
 	return nil
 }

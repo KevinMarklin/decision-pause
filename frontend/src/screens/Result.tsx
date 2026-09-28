@@ -18,7 +18,7 @@ export default function Result() {
       <p className="muted">Расчёт от {dateRu(created_at)}</p>
 
       <section className="card">
-        <h2>📋 Исходные данные</h2>
+        <h2>Исходные данные</h2>
         <div className="rows">
           <div className="row">
             <span className="muted">Сумма кредита</span>
@@ -60,7 +60,7 @@ export default function Result() {
       </section>
 
       <section className="card">
-        <h2>💳 Кредит</h2>
+        <h2>Кредит</h2>
         <div className="rows">
           <div className="row">
             <span className="muted">Платёж в месяц</span>

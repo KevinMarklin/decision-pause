@@ -4,13 +4,12 @@ export default function Home() {
   const navigate = useNavigate()
   return (
     <main className="screen">
-      <h1>🧠 Анти-импульс</h1>
+      <h1>Анти-импульс</h1>
       <p className="disclaimer">
         Мы не принимаем решение за вас — показываем возможные последствия.
       </p>
 
       <button className="card card-link" onClick={() => navigate('/form')}>
-        <span className="card-emoji">💳</span>
         <span>
           <strong>Взять кредит на развитие</strong>
           <br />
@@ -19,7 +18,7 @@ export default function Home() {
       </button>
 
       <Link className="nav-link" to="/history">
-        🕘 История анализов
+        История анализов
       </Link>
     </main>
   )

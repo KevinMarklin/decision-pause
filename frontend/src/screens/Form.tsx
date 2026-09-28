@@ -10,39 +10,39 @@ import {
 } from '../fields'
 import { useStore } from '../useStore'
 
-// validate вЂ” С‚Рµ Р¶Рµ РїСЂР°РІРёР»Р°, С‡С‚Рѕ Сѓ Р±СЌРєРµРЅРґР° (СЃРј. api.md, service.Validate).
+// validate — те же правила, что у бэкенда (см. api.md, service.Validate).
 function validate(values: FormValues): FieldErrors {
   const e: FieldErrors = {}
   const num = (name: keyof Inputs): number => parseNumber(values[name])
 
   const amount = num('loan_amount')
-  if (!Number.isFinite(amount) || amount <= 0) e.loan_amount = 'РґРѕР»Р¶РЅР° Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ 0'
+  if (!Number.isFinite(amount) || amount <= 0) e.loan_amount = 'должна быть больше 0'
 
   const term = num('loan_term_months')
   if (!Number.isFinite(term) || !Number.isInteger(term) || term < 1 || term > 360)
-    e.loan_term_months = 'РѕС‚ 1 РґРѕ 360 РјРµСЃСЏС†РµРІ'
+    e.loan_term_months = 'от 1 до 360 месяцев'
 
   const rate = num('interest_rate_pct')
-  if (!Number.isFinite(rate) || rate < 0 || rate > 100) e.interest_rate_pct = 'РѕС‚ 0 РґРѕ 100%'
+  if (!Number.isFinite(rate) || rate < 0 || rate > 100) e.interest_rate_pct = 'от 0 до 100%'
 
   const revenue = num('revenue')
-  if (!Number.isFinite(revenue) || revenue <= 0) e.revenue = 'РґРѕР»Р¶РЅР° Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ 0'
+  if (!Number.isFinite(revenue) || revenue <= 0) e.revenue = 'должна быть больше 0'
 
   const expenses = num('expenses')
-  if (!Number.isFinite(expenses) || expenses < 0) e.expenses = 'РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅРѕР№'
+  if (!Number.isFinite(expenses) || expenses < 0) e.expenses = 'не может быть отрицательной'
 
   const reserve = num('reserve')
-  if (!Number.isFinite(reserve) || reserve < 0) e.reserve = 'РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅРѕР№'
+  if (!Number.isFinite(reserve) || reserve < 0) e.reserve = 'не может быть отрицательной'
 
   const revGrowth = num('revenue_growth_pct')
   if (!Number.isFinite(revGrowth) || revGrowth < -100 || revGrowth > 500)
-    e.revenue_growth_pct = 'РѕС‚ -100 РґРѕ 500%'
+    e.revenue_growth_pct = 'от -100 до 500%'
 
   const expGrowth = num('expense_growth_pct')
   if (!Number.isFinite(expGrowth) || expGrowth < -100 || expGrowth > 500)
-    e.expense_growth_pct = 'РѕС‚ -100 РґРѕ 500%'
+    e.expense_growth_pct = 'от -100 до 500%'
 
-  if (values.purpose.length > 500) e.purpose = 'РЅРµ РґР»РёРЅРЅРµРµ 500 СЃРёРјРІРѕР»РѕРІ'
+  if (values.purpose.length > 500) e.purpose = 'не длиннее 500 символов'
   return e
 }
 
@@ -60,7 +60,7 @@ function toInputs(v: FormValues): Inputs {
   }
 }
 
-// В«РР·РјРµРЅРёС‚СЊВ» РЅР° СЌРєСЂР°РЅРµ РїСЂРѕРІРµСЂРєРё РґРѕР»Р¶РЅРѕ РІРѕР·РІСЂР°С‰Р°С‚СЊ Р·Р°РїРѕР»РЅРµРЅРЅСѓСЋ С„РѕСЂРјСѓ.
+// «Изменить» на экране проверки должно возвращать заполненную форму.
 function fromInputs(ini: Inputs): FormValues {
   return {
     loan_amount: String(ini.loan_amount),
@@ -95,9 +95,9 @@ export default function Form() {
   return (
     <main className="screen">
       <Link className="nav-link" to="/">
-        в†ђ РќР°Р·Р°Рґ
+        ← Назад
       </Link>
-      <h1>Р’Р·СЏС‚СЊ РєСЂРµРґРёС‚ РЅР° СЂР°Р·РІРёС‚РёРµ</h1>
+      <h1>Взять кредит на развитие</h1>
 
       <form className="form" onSubmit={onSubmit} noValidate>
         {FIELDS.map((f) => (
@@ -123,7 +123,7 @@ export default function Form() {
         ))}
 
         <button className="btn btn-primary" type="submit">
-          РџСЂРѕРІРµСЂРёС‚СЊ РґР°РЅРЅС‹Рµ в†’
+          Проверить данные →
         </button>
       </form>
     </main>

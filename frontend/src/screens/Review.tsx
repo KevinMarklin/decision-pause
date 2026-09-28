@@ -31,13 +31,13 @@ export default function Review() {
       navigate('/result')
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
-        setFormError('РћС‚РєСЂРѕР№С‚Рµ РїСЂРёР»РѕР¶РµРЅРёРµ Р·Р°РЅРѕРІРѕ вЂ” СЃРµСЃСЃРёСЏ РїСЂРѕС‚СѓС…Р»Р°.')
+        setFormError('Откройте приложение заново — сессия протухла.')
       } else if (err instanceof ApiError && err.code === 'validation' && err.fields) {
         setFieldErrs(err.fields)
       } else if (err instanceof ApiError && err.code === 'unknown_field' && err.unknownField) {
-        setFieldErrs({ [err.unknownField]: 'РЅРµРёР·РІРµСЃС‚РЅРѕРµ РїРѕР»Рµ С„РѕСЂРјС‹' })
+        setFieldErrs({ [err.unknownField]: 'неизвестное поле формы' })
       } else {
-        setFormError('Р§С‚Рѕ-С‚Рѕ РїРѕС€Р»Рѕ РЅРµ С‚Р°Рє, РїРѕРїСЂРѕР±СѓР№С‚Рµ РµС‰С‘ СЂР°Р·.')
+        setFormError('Что-то пошло не так, попробуйте ещё раз.')
       }
     } finally {
       setBusy(false)
@@ -52,9 +52,9 @@ export default function Review() {
   return (
     <main className="screen">
       <Link className="nav-link" to="/form">
-        в†ђ РР·РјРµРЅРёС‚СЊ РґР°РЅРЅС‹Рµ
+        ← Изменить данные
       </Link>
-      <h1>РџСЂРѕРІРµСЂРєР° РґР°РЅРЅС‹С…</h1>
+      <h1>Проверка данных</h1>
 
       <div className="card review-list">
         {FIELDS.map((f) => (
@@ -74,10 +74,10 @@ export default function Review() {
 
       <form className="form" onSubmit={onSubmit}>
         <button className="btn" type="button" onClick={() => navigate('/form')}>
-          РР·РјРµРЅРёС‚СЊ
+          Изменить
         </button>
         <button className="btn btn-primary" type="submit" disabled={busy}>
-          {busy ? 'Р Р°СЃС‡С‘С‚вЂ¦' : 'Р Р°СЃСЃС‡РёС‚Р°С‚СЊ'}
+          {busy ? 'Расчёт…' : 'Рассчитать'}
         </button>
       </form>
     </main>

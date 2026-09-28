@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { deleteDecision, listDecisions } from '../api/client'
-import type { HistoryItem } from '../api/types'
+import { Link, useNavigate } from 'react-router-dom'
+import { deleteDecision, getDecision, listDecisions } from '../api/client'
+import { ApiError, type HistoryItem } from '../api/types'
 import { dateRu, money, signedMoney } from '../format'
+import { useStore } from '../useStore'
 
 export default function History() {
+  const navigate = useNavigate()
+  const { setDecision } = useStore()
   const [items, setItems] = useState<HistoryItem[] | null>(null)
   const [error, setError] = useState(false)
   const [tick, setTick] = useState(0)
+  const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [openError, setOpenError] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -35,12 +40,35 @@ export default function History() {
     setItems((prev) => (prev ? prev.filter((it) => it.id !== id) : prev))
   }
 
+  async function open(id: string) {
+    if (loadingId) return
+    setLoadingId(id)
+    setOpenError(false)
+    try {
+      const d = await getDecision(id)
+      setDecision(d)
+      navigate('/result')
+    } catch (e) {
+      // 404 = удалили в другом окне — убираем из списка
+      if (e instanceof ApiError && e.status === 404) {
+        setItems((prev) => (prev ? prev.filter((it) => it.id !== id) : prev))
+      }
+      setOpenError(true)
+    } finally {
+      setLoadingId(null)
+    }
+  }
+
   return (
     <main className="screen">
       <Link className="nav-link" to="/">
         ← На главную
       </Link>
       <h1>История анализов</h1>
+
+      {openError && (
+        <p className="field-error">Не удалось открыть расчёт. Попробуйте ещё раз.</p>
+      )}
 
       {error ? (
         <>
@@ -61,13 +89,28 @@ export default function History() {
         </div>
       ) : (
         items.map((it) => (
-          <div className="card history-item" key={it.id}>
+          <div
+            className="card history-item"
+            key={it.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => void open(it.id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                void open(it.id)
+              }
+            }}
+          >
             <div className="row">
               <span className="muted">{dateRu(it.created_at)}</span>
               <button
                 className="icon-btn"
                 aria-label="Удалить анализ"
-                onClick={() => void remove(it.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  void remove(it.id)
+                }}
               >
                 ✕
               </button>
@@ -88,6 +131,13 @@ export default function History() {
               <span className={it.cash_flows.negative < 0 ? 'flow-neg' : 'flow-pos'}>
                 🔴 {signedMoney(it.cash_flows.negative)}
               </span>
+            </div>
+            <div className="history-more">
+              {loadingId === it.id ? (
+                <span className="muted">Загрузка…</span>
+              ) : (
+                <span>Подробнее →</span>
+              )}
             </div>
           </div>
         ))

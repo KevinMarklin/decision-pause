@@ -1,5 +1,5 @@
 ﻿import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { money, pct, signedMoney } from '../format'
+import { dateRu, money, pct, signedMoney } from '../format'
 import { useStore } from '../useStore'
 
 export default function Result() {
@@ -7,7 +7,7 @@ export default function Result() {
   const { decision, setScenarioKey } = useStore()
 
   if (!decision) return <Navigate to="/" replace />
-  const { credit } = decision
+  const { credit, inputs, created_at } = decision
 
   return (
     <main className="screen">
@@ -15,6 +15,49 @@ export default function Result() {
         ← На главную
       </Link>
       <h1>Результат</h1>
+      <p className="muted">Расчёт от {dateRu(created_at)}</p>
+
+      <section className="card">
+        <h2>📋 Исходные данные</h2>
+        <div className="rows">
+          <div className="row">
+            <span className="muted">Сумма кредита</span>
+            <span>{money(inputs.loan_amount)} ₽</span>
+          </div>
+          <div className="row">
+            <span className="muted">Срок</span>
+            <span>{inputs.loan_term_months} мес.</span>
+          </div>
+          <div className="row">
+            <span className="muted">Ставка</span>
+            <span>{pct(inputs.interest_rate_pct)}</span>
+          </div>
+          <div className="row">
+            <span className="muted">Выручка в месяц</span>
+            <span>{money(inputs.revenue)} ₽</span>
+          </div>
+          <div className="row">
+            <span className="muted">Расходы в месяц</span>
+            <span>{money(inputs.expenses)} ₽</span>
+          </div>
+          <div className="row">
+            <span className="muted">Резерв</span>
+            <span>{money(inputs.reserve)} ₽</span>
+          </div>
+          <div className="row">
+            <span className="muted">Рост выручки</span>
+            <span>{pct(inputs.revenue_growth_pct)}</span>
+          </div>
+          <div className="row">
+            <span className="muted">Рост расходов</span>
+            <span>{pct(inputs.expense_growth_pct)}</span>
+          </div>
+          <div className="row">
+            <span className="muted">Цель</span>
+            <span>{inputs.purpose}</span>
+          </div>
+        </div>
+      </section>
 
       <section className="card">
         <h2>💳 Кредит</h2>

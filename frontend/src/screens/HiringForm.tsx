@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { analyzeHiring } from '../api/client'
-import type { HiringInputs, HiringResult } from '../api/types'
+import type { HiringResult } from '../api/types'
 import { money } from '../format'
 
 const initialValues = { salary: '100 000', margin_percent: '30', average_check: '25 000', tax_rate: '30', overhead_costs: '0' }

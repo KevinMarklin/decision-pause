@@ -239,6 +239,24 @@ button {
   border-left: 4px solid var(--red);
 }
 
+.marketing-scenarios {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--accent-bg);
+}
+
+.hero strong {
+  color: var(--text-h);
+  font-size: 20px;
+}
+
 /* --- последствия и чек-лист --- */
 
 .consequences {

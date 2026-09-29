@@ -8,6 +8,8 @@ import Result from './screens/Result'
 import Consequences from './screens/Consequences'
 import Checklist from './screens/Checklist'
 import History from './screens/History'
+import MarketingForm from './screens/MarketingForm'
+import MarketingResult from './screens/MarketingResult'
 
 export default function App() {
   // MAX Bridge: сообщаем мессенджеру, что приложение отрисовано
@@ -27,6 +29,8 @@ export default function App() {
           <Route path="/consequences" element={<Consequences />} />
           <Route path="/checklist" element={<Checklist />} />
           <Route path="/history" element={<History />} />
+          <Route path="/marketing" element={<MarketingForm />} />
+          <Route path="/marketing/result" element={<MarketingResult />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </HashRouter>

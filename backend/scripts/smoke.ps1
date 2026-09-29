@@ -45,6 +45,17 @@ Assert ($d.scenarios[2].reserve_months -eq 13) "резерв на 13 мес (got
 Assert ($d.checklist.Count -eq 5) "чек-лист 5 пунктов"
 Assert ($d.scenarios[0].consequences.Count -ge 1) "последствия заполнены"
 
+Write-Host "== POST /api/v1/analyze/marketing"
+$marketing = @{
+    budget = 300000; avg_check = 10000; margin_pct = 40; lead_cost = 1500
+    expected_boost_pct = 20; current_revenue = 800000; fixed_expenses = 600000; reserve = 500000
+} | ConvertTo-Json
+$m = Invoke-RestMethod "$Base/api/v1/analyze/marketing" -Method Post -ContentType "application/json" `
+    -Body ([System.Text.Encoding]::UTF8.GetBytes($marketing))
+Assert ($m.break_even_orders -eq 75) "marketing break-even=75"
+Assert ($m.scenarios.Count -eq 3) "marketing 3 сценария"
+Assert ($m.scenarios[0].status -eq "green") "marketing expected=green"
+
 Write-Host "== GET /api/decisions/{id}"
 $g = Invoke-RestMethod "$Base/api/decisions/$($d.id)"
 Assert ($g.id -eq $d.id) "id совпадает"
@@ -122,4 +133,3 @@ Assert-Status { Invoke-RestMethod "$Base/api/decisions/$($toDelete.id)" } 404 "�
 Write-Host ""
 if ($failed -eq 0) { Write-Host "SMOKE OK" -ForegroundColor Green; exit 0 }
 else { Write-Host "SMOKE FAILED: $failed" -ForegroundColor Red; exit 1 }
-

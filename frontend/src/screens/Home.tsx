@@ -17,6 +17,10 @@ export default function Home() {
         </span>
       </button>
 
+      <button className="card card-link" onClick={() => navigate('/marketing')}>
+        <span><strong>Запустить рекламную кампанию</strong><br /><span className="muted">Анкета → 3 сценария → последствия</span></span>
+      </button>
+
       <Link className="nav-link" to="/history">
         История анализов
       </Link>

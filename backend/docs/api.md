@@ -136,6 +136,26 @@ Base URL (dev): `http://localhost:8080` — в Vite используйте proxy
 
 ---
 
+## POST /api/v1/analyze/marketing
+
+Рассчитать рекламную кампанию без сохранения результата. Тело запроса содержит
+`budget`, `avg_check`, `margin_pct`, `lead_cost`, `expected_boost_pct`,
+`current_revenue`, `fixed_expenses` и `reserve`. Ответ `200` содержит
+`break_even_orders`, `break_even_revenue`, три сценария `expected`, `moderate`,
+`negative`, блок `consequences` и `checklist`.
+
+Умеренный сценарий использует прирост × 0.85 и CAC × 1.15, негативный — прирост
+× 0.50 и CAC × 1.35. Сценарий содержит `additional_orders`, `ad_profit`, `roi`,
+`cash_flow`, `status`, `reserve_months` и `consequence`.
+
+Пример запроса:
+
+```json
+{"budget":300000,"avg_check":10000,"margin_pct":40,"lead_cost":1500,"expected_boost_pct":20,"current_revenue":800000,"fixed_expenses":600000,"reserve":500000}
+```
+
+Ошибка валидации возвращается как `400` с объектом `fields`.
+
 ## GET /api/decisions/{id}
 
 Тот же объект, что и POST-ответ (для перезагрузки/истории).

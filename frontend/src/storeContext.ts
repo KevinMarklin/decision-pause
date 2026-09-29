@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { Decision, Inputs, ScenarioKey } from './api/types'
+import type { Decision, Inputs, MarketingInputs, MarketingResult, ScenarioKey } from './api/types'
 
 // Общий стейт пути «анкета → проверка → результат»: данные живут в памяти,
 // на перезагрузку их не восстанавливаем (расчёт — быстрый снимок).
@@ -10,6 +10,10 @@ export interface Store {
   setDecision: (d: Decision | null) => void
   scenarioKey: ScenarioKey | null
   setScenarioKey: (k: ScenarioKey | null) => void
+  marketingDraft: MarketingInputs | null
+  setMarketingDraft: (d: MarketingInputs | null) => void
+  marketingResult: MarketingResult | null
+  setMarketingResult: (r: MarketingResult | null) => void
 }
 
 export const StoreContext = createContext<Store | null>(null)

@@ -140,13 +140,17 @@ Base URL (dev): `http://localhost:8080` — в Vite используйте proxy
 
 Рассчитать рекламную кампанию без сохранения результата. Тело запроса содержит
 `budget`, `avg_check`, `margin_pct`, `lead_cost`, `expected_boost_pct`,
-`current_revenue`, `fixed_expenses` и `reserve`. Ответ `200` содержит
+`current_revenue`, `fixed_expenses`, `reserve` и необязательный
+`is_black_swan` (по умолчанию `false`). Ответ `200` содержит
 `break_even_orders`, `break_even_revenue`, три сценария `expected`, `moderate`,
 `negative`, блок `consequences` и `checklist`.
 
 Умеренный сценарий использует прирост × 0.85 и CAC × 1.15, негативный — прирост
 × 0.50 и CAC × 1.35. Сценарий содержит `additional_orders`, `ad_profit`, `roi`,
-`cash_flow`, `status`, `reserve_months` и `consequence`.
+`cash_flow`, `status`, `reserve_months`, `revenue`, `expenses`, `net_profit`,
+`margin_pct` и `consequence`. При `is_black_swan=true` дополнительно применяются
+выручка × 0.80 и расходы/стоимость рекламы × 1.15, а ответ содержит
+`is_black_swan_active=true`.
 
 Пример запроса:
 

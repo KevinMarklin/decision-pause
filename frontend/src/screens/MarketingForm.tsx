@@ -15,6 +15,7 @@ export default function MarketingForm() {
   const navigate = useNavigate(); const { marketingDraft, setMarketingDraft, setMarketingResult } = useStore()
   const [values, setValues] = useState<Record<keyof MarketingInputs, string>>(() => Object.fromEntries(fields.map((f) => [f.name, marketingDraft?.[f.name] ? String(marketingDraft[f.name]) : ''])) as Record<keyof MarketingInputs, string>)
   const [error, setError] = useState('')
+  const [blackSwan, setBlackSwan] = useState(Boolean(marketingDraft?.is_black_swan))
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
     const numberValue = (name: keyof MarketingInputs): number =>
@@ -30,9 +31,15 @@ export default function MarketingForm() {
       reserve: numberValue('reserve'),
     }
     if (Object.values(input).some((value) => !Number.isFinite(value))) { setError('Заполните все поля числами'); return }
-    try { setMarketingDraft(input); setMarketingResult(await analyzeMarketing(input)); navigate('/marketing/result') } catch { setError('Не удалось проверить данные. Попробуйте ещё раз.') }
+    try {
+      const request = { ...input, is_black_swan: blackSwan }
+      setMarketingDraft(request)
+      setMarketingResult(await analyzeMarketing(request))
+      navigate('/marketing/result')
+    } catch { setError('Не удалось проверить данные. Попробуйте ещё раз.') }
   }
   return <main className="screen"><Link className="nav-link" to="/">← Назад</Link><h1>Запустить рекламную кампанию</h1><form className="form" onSubmit={onSubmit} noValidate>
+    <label className="panic-toggle"><input type="checkbox" checked={blackSwan} onChange={(e) => setBlackSwan(e.target.checked)} /><span><strong>🧪 Стресс-тест «Чёрный лебедь»</strong><small>Падение выручки на 20% и рост расходов на 15%</small></span></label>
     {fields.map((f) => <label className="field" key={f.name}><span className="field-label">{f.label}</span><input inputMode="decimal" name={f.name} placeholder={f.placeholder} value={values[f.name]} onChange={(e) => setValues((prev) => ({ ...prev, [f.name]: e.target.value }))} /></label>)}
     {error ? <span className="field-error">{error}</span> : null}<button className="btn btn-primary" type="submit">Проверить данные →</button>
   </form></main>

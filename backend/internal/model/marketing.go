@@ -10,6 +10,7 @@ type MarketingInput struct {
 	CurrentRevenue   float64 `json:"current_revenue"`
 	FixedExpenses    float64 `json:"fixed_expenses"`
 	Reserve          float64 `json:"reserve"`
+	IsBlackSwan      bool    `json:"is_black_swan,omitempty"`
 }
 
 type MarketingScenario struct {
@@ -24,6 +25,11 @@ type MarketingScenario struct {
 	Status          string  `json:"status"`
 	ReserveMonths   *int    `json:"reserve_months"`
 	Consequence     string  `json:"consequence"`
+	AdCost          float64 `json:"ad_cost"`
+	Revenue         float64 `json:"revenue"`
+	Expenses        float64 `json:"expenses"`
+	NetProfit       float64 `json:"net_profit"`
+	MarginPct       float64 `json:"margin_pct"`
 }
 
 type MarketingResult struct {
@@ -32,4 +38,7 @@ type MarketingResult struct {
 	Scenarios        []MarketingScenario `json:"scenarios"`
 	Consequences     []string           `json:"consequences"`
 	Checklist        []string           `json:"checklist"`
+	IsBlackSwanActive bool               `json:"is_black_swan_active"`
+	Budget            float64            `json:"budget,omitempty"`
+	Reserve           float64            `json:"reserve,omitempty"`
 }

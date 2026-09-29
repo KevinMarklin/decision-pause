@@ -21,3 +21,14 @@ func TestMarketingReserveMonths(t *testing.T) {
 	got := MarketingResult(in).Scenarios[2]
 	if got.Status != "red" || got.ReserveMonths == nil || *got.ReserveMonths != 1 { t.Fatalf("red reserve = %q/%v", got.Status, got.ReserveMonths) }
 }
+
+func TestApplyBlackSwan(t *testing.T) {
+	base := MarketingResult(model.MarketingInput{Budget: 300000, AvgCheck: 10000, MarginPct: 40, LeadCost: 1500, ExpectedBoostPct: 20, CurrentRevenue: 800000, FixedExpenses: 600000, Reserve: 500000})
+	got := ApplyBlackSwan(base)
+	if !got.IsBlackSwanActive { t.Fatal("black swan flag is false") }
+	if got.Scenarios[0].AdditionalOrders != 192 { t.Fatalf("orders = %.0f, want 192", got.Scenarios[0].AdditionalOrders) }
+	if got.Scenarios[0].Revenue != 2560000 { t.Fatalf("revenue = %.0f, want 2560000", got.Scenarios[0].Revenue) }
+	if got.Scenarios[0].Expenses != 1035000 { t.Fatalf("expenses = %.0f, want 1035000", got.Scenarios[0].Expenses) }
+	if got.Scenarios[0].AdProfit != 423000 { t.Fatalf("ad profit = %.0f, want 423000", got.Scenarios[0].AdProfit) }
+	if got.Scenarios[0].Status != "red" { t.Fatalf("status = %q, want red", got.Scenarios[0].Status) }
+}

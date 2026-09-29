@@ -17,7 +17,18 @@ export default function MarketingForm() {
   const [error, setError] = useState('')
   async function onSubmit(event: FormEvent) {
     event.preventDefault()
-    const input = Object.fromEntries(fields.map((f) => [f.name, Number(values[f.name].replace(/\s/g, '').replace(',', '.'))])) as MarketingInputs
+    const numberValue = (name: keyof MarketingInputs): number =>
+      Number(values[name].replace(/\s/g, '').replace(',', '.'))
+    const input: MarketingInputs = {
+      budget: numberValue('budget'),
+      avg_check: numberValue('avg_check'),
+      margin_pct: numberValue('margin_pct'),
+      lead_cost: numberValue('lead_cost'),
+      expected_boost_pct: numberValue('expected_boost_pct'),
+      current_revenue: numberValue('current_revenue'),
+      fixed_expenses: numberValue('fixed_expenses'),
+      reserve: numberValue('reserve'),
+    }
     if (Object.values(input).some((value) => !Number.isFinite(value))) { setError('Заполните все поля числами'); return }
     try { setMarketingDraft(input); setMarketingResult(await analyzeMarketing(input)); navigate('/marketing/result') } catch { setError('Не удалось проверить данные. Попробуйте ещё раз.') }
   }

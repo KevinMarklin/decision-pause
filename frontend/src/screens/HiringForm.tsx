@@ -4,7 +4,7 @@ import { analyzeHiring } from '../api/client'
 import type { HiringResult } from '../api/types'
 import { money } from '../format'
 
-const initialValues = { salary: '100 000', margin_percent: '30', average_check: '25 000', tax_rate: '30', overhead_costs: '0' }
+const initialValues = { salary: '', margin_percent: '', average_check: '', tax_rate: '', overhead_costs: '' }
 
 function numberValue(value: string): number {
   return Number(value.replace(/\s/g, '').replace(',', '.'))
@@ -28,7 +28,7 @@ export default function HiringForm() {
       }
       try {
         setError('')
-        setResult(await analyzeHiring({ salary, margin_percent: margin, average_check: Number.isFinite(averageCheck) ? averageCheck : 0, tax_rate: Number.isFinite(taxRate) ? taxRate : 0.3, overhead_costs: Number.isFinite(overhead) ? overhead : 0 }))
+        setResult(await analyzeHiring({ salary, margin_percent: margin, average_check: Number.isFinite(averageCheck) ? averageCheck : 0, tax_rate: Number.isFinite(taxRate) && taxRate > 0 ? taxRate : 0, overhead_costs: Number.isFinite(overhead) ? overhead : 0 }))
       } catch {
         setError('Не удалось пересчитать данные. Проверьте значения.')
       }

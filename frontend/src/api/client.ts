@@ -1,4 +1,4 @@
-import { ApiError, type Decision, type HistoryItem, type Inputs, type MarketingInputs, type MarketingResult } from './types'
+import { ApiError, type Decision, type HistoryItem, type HiringInputs, type HiringResult, type Inputs, type MarketingInputs, type MarketingResult } from './types'
 
 /** Идентичность: прод — сырая подпись initData, dev — legacy id из unsafe. */
 function identityHeaders(): Record<string, string> {
@@ -56,6 +56,10 @@ export function postDecision(inputs: Inputs): Promise<Decision> {
 
 export function analyzeMarketing(inputs: MarketingInputs): Promise<MarketingResult> {
   return request<MarketingResult>('/api/v1/analyze/marketing', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(inputs) })
+}
+
+export function analyzeHiring(inputs: HiringInputs): Promise<HiringResult> {
+  return request<HiringResult>('/api/v1/analyze/hiring', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(inputs) })
 }
 
 export function getDecision(id: string): Promise<Decision> {

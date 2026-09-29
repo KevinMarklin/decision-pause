@@ -50,6 +50,7 @@ func (h *Handler) Routes() http.Handler {
 	api := http.NewServeMux()
 	api.HandleFunc("POST /api/decisions", h.createDecision)
 	api.HandleFunc("POST /api/v1/analyze/marketing", h.analyzeMarketing)
+	api.HandleFunc("POST /api/v1/analyze/hiring", h.analyzeHiring)
 	api.HandleFunc("GET /api/decisions", h.listDecisions)
 	api.HandleFunc("GET /api/decisions/{id}", h.getDecision)
 	api.HandleFunc("DELETE /api/decisions/{id}", h.deleteDecision)

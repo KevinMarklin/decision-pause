@@ -21,6 +21,10 @@ export default function Home() {
         <span><strong>Запустить рекламную кампанию</strong><br /><span className="muted">Анкета → 3 сценария → последствия</span></span>
       </button>
 
+      <button className="card card-link" onClick={() => navigate('/hiring')}>
+        <span><strong>💼 Рассчитать найм сотрудника</strong><br /><span className="muted">Полная стоимость → точка безубыточности</span></span>
+      </button>
+
       <Link className="nav-link" to="/history">
         История анализов
       </Link>

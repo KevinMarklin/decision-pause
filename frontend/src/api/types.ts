@@ -56,6 +56,8 @@ export interface HistoryItem {
 export interface MarketingInputs { budget: number; avg_check: number; margin_pct: number; lead_cost: number; expected_boost_pct: number; current_revenue: number; fixed_expenses: number; reserve: number; is_black_swan?: boolean }
 export interface MarketingScenario { key: ScenarioKey; title: string; emoji: string; additional_orders: number; ad_revenue: number; ad_cost: number; ad_profit: number; roi: number; cash_flow: number; status: 'green' | 'yellow' | 'red'; reserve_months: number | null; consequence: string; revenue: number; expenses: number; net_profit: number; margin_pct: number }
 export interface MarketingResult { break_even_orders: number; break_even_revenue: number; scenarios: MarketingScenario[]; consequences: string[]; checklist: string[]; is_black_swan_active: boolean; budget?: number; reserve?: number }
+export interface HiringInputs { salary: number; tax_rate?: number; overhead_costs?: number; margin_percent: number; average_check?: number }
+export interface HiringResult { salary: number; tax_rate: number; overhead_costs: number; total_cost: number; margin_percent: number; break_even_revenue: number; break_even_deals: number; payback_multiplier: number }
 
 export type FieldErrors = Partial<Record<keyof Inputs | 'unknown_field', string>>
 

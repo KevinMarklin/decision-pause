@@ -273,6 +273,16 @@ button {
 .panic-toggle small { color: var(--muted); }
 .panic-alert { padding: 12px 14px; border: 1px solid var(--red); border-radius: var(--radius); color: var(--red); background: color-mix(in srgb, var(--red) 10%, transparent); font-weight: 600; }
 
+.advanced-settings { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.advanced-settings summary { cursor: pointer; font-weight: 600; }
+.advanced-settings .form { margin-top: 14px; }
+.hiring-result { display: flex; flex-direction: column; gap: 14px; }
+.hiring-metric { display: flex; flex-direction: column; gap: 3px; padding-top: 10px; border-top: 1px solid var(--border); }
+.hiring-metric strong { color: var(--text-h); font-size: 22px; }
+.hiring-metric small { color: var(--muted); }
+.hiring-warning strong { color: var(--red); }
+.hiring-insight { padding: 12px; background: var(--accent-bg); border-radius: var(--radius); }
+
 /* --- последствия и чек-лист --- */
 
 .consequences {

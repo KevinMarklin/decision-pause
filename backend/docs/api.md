@@ -160,6 +160,46 @@ Base URL (dev): `http://localhost:8080` — в Vite используйте proxy
 
 Ошибка валидации возвращается как `400` с объектом `fields`.
 
+## POST /api/v1/analyze/hiring
+
+Рассчитать полную стоимость найма сотрудника и точку безубыточности без сохранения
+результата.
+
+```json
+{
+  "salary": 100000,
+  "tax_rate": 0.30,
+  "overhead_costs": 0,
+  "margin_percent": 30,
+  "average_check": 25000
+}
+```
+
+`tax_rate` передаётся десятичной долей: `0.30` означает 30%. Если поле не указано
+или равно нулю, применяется значение по умолчанию `0.30`. `average_check` и
+`overhead_costs` необязательны.
+
+Ответ `200`:
+
+```json
+{
+  "salary": 100000,
+  "tax_rate": 0.3,
+  "overhead_costs": 0,
+  "total_cost": 130000,
+  "margin_percent": 30,
+  "break_even_revenue": 433333.3333333333,
+  "break_even_deals": 18,
+  "payback_multiplier": 4.333333333333333
+}
+```
+
+Формулы: `total_cost = salary × (1 + tax_rate) + overhead_costs`,
+`break_even_revenue = total_cost / (margin_percent / 100)`,
+`break_even_deals = ceil(break_even_revenue / average_check)`.
+При нулевой маржинальности `break_even_revenue`, `break_even_deals` и
+`payback_multiplier` возвращаются как `0`, без деления на ноль.
+
 ## GET /api/decisions/{id}
 
 Тот же объект, что и POST-ответ (для перезагрузки/истории).

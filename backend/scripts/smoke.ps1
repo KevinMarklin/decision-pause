@@ -56,6 +56,16 @@ Assert ($m.break_even_orders -eq 75) "marketing break-even=75"
 Assert ($m.scenarios.Count -eq 3) "marketing 3 сценария"
 Assert ($m.scenarios[0].status -eq "green") "marketing expected=green"
 
+Write-Host "== POST /api/v1/analyze/hiring"
+$hiring = @{
+    salary = 100000; tax_rate = 0.30; overhead_costs = 0; margin_percent = 30; average_check = 25000
+} | ConvertTo-Json
+$hr = Invoke-RestMethod "$Base/api/v1/analyze/hiring" -Method Post -ContentType "application/json" `
+    -Body ([System.Text.Encoding]::UTF8.GetBytes($hiring))
+Assert ($hr.total_cost -eq 130000) "hiring total cost=130000"
+Assert ($hr.break_even_deals -eq 18) "hiring break-even deals=18"
+Assert ([math]::Abs($hr.break_even_revenue - 433333.3333333333) -lt 0.01) "hiring break-even revenue"
+
 Write-Host "== GET /api/decisions/{id}"
 $g = Invoke-RestMethod "$Base/api/decisions/$($d.id)"
 Assert ($g.id -eq $d.id) "id совпадает"
